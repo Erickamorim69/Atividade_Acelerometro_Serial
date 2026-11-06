@@ -227,10 +227,7 @@ void thread_calculo_posicao(void *p1, void *p2, void *p3)
 }
 
 // -------------------------------------------------------------------
-// THREAD 4: Envio Serial (CSV: TIMESTAMP, AX, AY, AZ, VX, VY, VZ, PX, PY, PZ)
-// -------------------------------------------------------------------
-// -------------------------------------------------------------------
-// THREAD 4: Exibição
+// THREAD 4: Transmissão Serial Formatada em CSV (9 Colunas)
 // -------------------------------------------------------------------
 void thread_serial_tx_entry(void *p1, void *p2, void *p3)
 {
@@ -241,41 +238,36 @@ void thread_serial_tx_entry(void *p1, void *p2, void *p3)
     int vxi, vxf, vyi, vyf, vzi, vzf;
     int pxi, pxf, pyi, pyf, pzi, pzf;
 
-    // Aguarda a calibração inicial antes de começar a imprimir
+    // Aguarda a calibração inicial terminar antes de enviar dados
     while (!calibrado) {
         k_msleep(100);
     }
 
-    // Imprime o cabeçalho das colunas uma única vez
-    printk("\n========================================================================================================================\n");
-    printk("  TEMPO (ms)  |    ACELERACAO (m/s²)    |     VELOCIDADE (m/s)    |        POSICAO (m)      | NO REPOUSO (ZUPT)?\n");
-    printk("========================================================================================================================\n");
-
     while (1) {
         if (calc_vel_pronto && calc_pos_pronto) {
 
-            // Converte floats em partes inteiras/fracionárias com sinal
+            // Formatação de Aceleração (ax, ay, az)
             formatar_float(ax, &sax, &axi, &axf);
             formatar_float(ay, &say, &ayi, &ayf);
             formatar_float(az, &saz, &azi, &azf);
 
+            // Formatação de Velocidade (vx, vy, vz)
             formatar_float(vx, &svx, &vxi, &vxf);
             formatar_float(vy, &svy, &vyi, &vyf);
             formatar_float(vz, &svz, &vzi, &vzf);
 
+            // Formatação de Posição (px, py, pz)
             formatar_float(px, &spx, &pxi, &pxf);
             formatar_float(py, &spy, &pyi, &pyf);
             formatar_float(pz, &spz, &pzi, &pzf);
 
-            // Exibição alinhada em linha única por amostragem
-            printk("[%6lld ms] | X:%c%d.%03d Y:%c%d.%03d Z:%c%d.%03d | X:%c%d.%03d Y:%c%d.%03d Z:%c%d.%03d | X:%c%d.%03d Y:%c%d.%03d Z:%c%d.%03d | %s\n",
-                   t_ms,
+            // Envio estrito de 9 valores numéricos via CSV: ax,ay,az,vx,vy,vz,px,py,pz
+            printk("%c%d.%03d,%c%d.%03d,%c%d.%03d,%c%d.%03d,%c%d.%03d,%c%d.%03d,%c%d.%03d,%c%d.%03d,%c%d.%03d\n",
                    sax, axi, axf, say, ayi, ayf, saz, azi, azf,
                    svx, vxi, vxf, svy, vyi, vyf, svz, vzi, vzf,
-                   spx, pxi, pxf, spy, pyi, pyf, spz, pzi, pzf,
-                   em_repouso ? " SIM [Trava VX/VY/VZ]" : " NAO [Em movimento]");
+                   spx, pxi, pxf, spy, pyi, pyf, spz, pzi, pzf);
 
-            // Reseta as flags de controle
+            // Reseta as flags para permitir o próximo ciclo da esteira
             calc_vel_pronto = false;
             calc_pos_pronto = false;
             dado_novo = false;

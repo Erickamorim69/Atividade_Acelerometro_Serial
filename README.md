@@ -1,1 +1,1 @@
-implementei as threads para receber os dados, calcular a velocidade , a posicao e exibir no terminal serial. Falta implementar as funcoes em python relacionadas à gerar o grafico.
+Nessa branch foi feita a execução dos codigos em python para criar o gráfico que está anexado na pasta do projeto.
