@@ -4,7 +4,7 @@ import time
 import sys
 
 # ================= CONFIGURAÇÕES =================
-PORTA_SERIAL = 'COM6'
+PORTA_SERIAL = 'COM10'
 BAUD_RATE = 115200
 ARQUIVO_CSV = 'dados_cinematicos.csv'
 # =================================================
